@@ -1,0 +1,22 @@
+# Gradle
+.gradle/
+build/
+
+# Minecraft run directory created by `gradlew runClient`
+run/
+
+# Build/plugin logs
+logs/
+
+# Written by `gradlew runClient` when -Dmixin.debug.export=true
+.mixin.out/
+
+# Snapshots made by backup.bat
+backups/
+
+# IDEs and editors
+.idea/
+*.iml
+.vscode/
+*.class
+*.log

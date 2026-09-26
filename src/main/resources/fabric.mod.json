@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "visualspearhitbox",
+	"version": "${version}",
+	"name": "Visual Spear Hitbox",
+	"description": "adds a visual fixed hitbox when holding the spear. this is a hitbox for using the spear and not attacking with it.",
+	"authors": [
+		"Visual Spear Hitbox contributors"
+	],
+	"contact": {},
+	"license": "MIT",
+	"icon": "assets/visualspearhitbox/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.visualspearhitbox.VisualSpearHitbox"
+		],
+		"modmenu": [
+			"com.visualspearhitbox.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		{
+			"config": "visualspearhitbox.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=21"
+	},
+	"recommends": {
+		"modmenu": "*",
+		"cloth-config": "*"
+	}
+}

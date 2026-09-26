@@ -1,0 +1,97 @@
+plugins {
+	// Fabric Loom, "remap" flavour. We compile against the official Mojang
+	// mappings that ship with Minecraft 1.21.11, while Fabric Loader and Fabric
+	// API are published in intermediary mappings, so Loom still has to remap
+	// dependencies. The plain `net.fabricmc.fabric-loom` plugin cannot do that.
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+}
+
+version = "${project.mod_version}"
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	// Loom already provides the Minecraft / Fabric repositories.
+	mavenCentral()
+
+	// Mod Menu is hosted by TerraformersMC.
+	maven {
+		name = "TerraformersMC"
+		url = "https://maven.terraformersmc.com/releases/"
+	}
+
+	// Cloth Config is hosted by shedaniel.
+	maven {
+		name = "shedaniel"
+		url = "https://maven.shedaniel.me/"
+	}
+}
+
+dependencies {
+	// See gradle.properties for the versions.
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings loom.officialMojangMappings()
+
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// Soft dependencies: they exist only so the Mod Menu config screen compiles. Neither is bundled
+	// into the jar — fabric.mod.json declares both under "recommends", so the mod still runs,
+	// toggleable through its JSON config, when they are absent.
+	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+	modImplementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
+
+	// Unit tests run on a plain JVM. The hitbox maths is deliberately kept free
+	// of client-only Minecraft classes so it can be tested without launching the
+	// game.
+	testImplementation platform("org.junit:junit-bom:${project.junit_version}")
+	testImplementation "org.junit.jupiter:junit-jupiter"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+processResources {
+	inputs.property "version", project.version
+	inputs.property "minecraft_version", project.minecraft_version
+	inputs.property "loader_version", project.loader_version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version,
+			"minecraft_version": project.minecraft_version,
+			"loader_version": project.loader_version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = "UTF-8"
+	options.release = 21
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+test {
+	useJUnitPlatform()
+
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStandardStreams = false
+	}
+}
+
+// Capture the name eagerly: reading project.* from inside a task action (here the rename closure)
+// is deprecated at execution time and would break under Gradle 10's configuration cache.
+def licenseName = "LICENSE_${project.archives_base_name}"
+
+jar {
+	inputs.property "licenseName", licenseName
+
+	from("LICENSE") {
+		rename { licenseName }
+	}
+}
